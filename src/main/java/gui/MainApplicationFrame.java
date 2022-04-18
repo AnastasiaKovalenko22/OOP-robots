@@ -5,19 +5,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyVetoException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.*;
 
 import log.Logger;
+import state.MapTransformer;
+import state.StateFileManager;
 
 /**
  * Что требуется сделать:
  * 1. Метод создания меню перегружен функционалом и трудно читается.
  * Следует разделить его на серию более простых методов (или вообще выделить отдельный класс).
- *
  */
-public class MainApplicationFrame extends JFrame
-{
+public class MainApplicationFrame extends JFrame {
     private static final String CLOSING_MENU_ITEM_TITLE = "Закрыть";
     private static final String LOOK_AND_FEEL_MENU_TITLE = "Режим отображения";
     private static final String LOOK_AND_FEEL_MENU_DESCRIPTION = "Управление режимом отображения приложения";
@@ -29,22 +32,23 @@ public class MainApplicationFrame extends JFrame
     private static final String TEST_MENU_ITEM_TITLE = "Сообщение в лог";
     private static final String TEST_DEBUG_MESSAGE = "Новая строка";
 
-    private static final String PROTOCOL_WORKING_DEBUG_MESSAGE ="Протокол работает";
+    private static final String PROTOCOL_WORKING_DEBUG_MESSAGE = "Протокол работает";
     private static final String CLOSE_CONFIRMATION_DIALOG_TITLE = "Подтверждение выхода";
     private static final String CLOSE_CONFIRMATION_DIALOG_QUESTION = "Закрыть окно?";
     private static final String CLOSE_CONFIRMATION_DIALOG_YES_OPTION = "Да";
     private static final String CLOSE_CONFIRMATION_DIALOG_NO_OPTION = "Нет";
 
     private final JDesktopPane desktopPane = new JDesktopPane();
+    private final StateFileManager stateFileManager = new StateFileManager();
 
-    public MainApplicationFrame() {
+    public MainApplicationFrame() throws PropertyVetoException {
         //Make the big window be indented 50 pixels from each edge
         //of the screen.
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(inset, inset,
-                screenSize.width  - inset*2,
-                screenSize.height - inset*2);
+                screenSize.width - inset * 2,
+                screenSize.height - inset * 2);
 
         setContentPane(desktopPane);
 
@@ -52,23 +56,24 @@ public class MainApplicationFrame extends JFrame
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
 
-        GameWindow gameWindow = new GameWindow();
-        gameWindow.setSize(400,  400);
+        GameWindow gameWindow = createGameWindow();
         addWindow(gameWindow);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter()
-        {
-            public void windowClosing(WindowEvent event)
-            {
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent event) {
+                MapTransformer state = new MapTransformer(new HashMap<>());
+                state.addSubMapToGeneralMapByPrefix("log", logWindow.saveState());
+                state.addSubMapToGeneralMapByPrefix("game", gameWindow.saveState());
+                stateFileManager.writeStateInFile(state);
                 showConfirmationExitDialog(event);
             }
         });
     }
 
-    private void showConfirmationExitDialog(WindowEvent event){
-        Object[] options = { CLOSE_CONFIRMATION_DIALOG_YES_OPTION, CLOSE_CONFIRMATION_DIALOG_NO_OPTION};
+    private void showConfirmationExitDialog(WindowEvent event) {
+        Object[] options = {CLOSE_CONFIRMATION_DIALOG_YES_OPTION, CLOSE_CONFIRMATION_DIALOG_NO_OPTION};
         int n = JOptionPane.showOptionDialog(event.getWindow(), CLOSE_CONFIRMATION_DIALOG_QUESTION,
                 CLOSE_CONFIRMATION_DIALOG_TITLE, JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
@@ -78,19 +83,33 @@ public class MainApplicationFrame extends JFrame
         }
     }
 
-    protected LogWindow createLogWindow()
-    {
+    protected LogWindow createLogWindow() throws PropertyVetoException {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
-        logWindow.setLocation(10,10);
-        logWindow.setSize(300, 800);
-        setMinimumSize(logWindow.getSize());
-        logWindow.pack();
+        Map<String, String> state = stateFileManager.readStateFromFile();
+        if (state != null) {
+            logWindow.restoreState(new MapTransformer(state).getSubMap("log"));
+        } else {
+            logWindow.setLocation(10, 10);
+            logWindow.setSize(300, 800);
+            setMinimumSize(logWindow.getSize());
+            logWindow.pack();
+        }
         Logger.debug(PROTOCOL_WORKING_DEBUG_MESSAGE);
         return logWindow;
     }
 
-    protected void addWindow(JInternalFrame frame)
-    {
+    protected GameWindow createGameWindow() throws PropertyVetoException {
+        GameWindow gameWindow = new GameWindow();
+        Map<String, String> state = stateFileManager.readStateFromFile();
+        if (state != null) {
+            gameWindow.restoreState(new MapTransformer(state).getSubMap("game"));
+        } else {
+            gameWindow.setSize(400, 400);
+        }
+        return gameWindow;
+    }
+
+    protected void addWindow(JInternalFrame frame) {
         desktopPane.add(frame);
         frame.setVisible(true);
     }
@@ -124,8 +143,7 @@ public class MainApplicationFrame extends JFrame
 //        return menuBar;
 //    }
 
-    private JMenuBar generateMenuBar()
-    {
+    private JMenuBar generateMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         JMenu lookAndFeelMenu = generateLookAndFeelMenu();
         JMenu testMenu = generateTestMenu();
@@ -138,13 +156,13 @@ public class MainApplicationFrame extends JFrame
         return menuBar;
     }
 
-    private JMenuItem createNewJMenuItem(String itemText, int keyEvent, ActionListener listener){
+    private JMenuItem createNewJMenuItem(String itemText, int keyEvent, ActionListener listener) {
         JMenuItem newItem = new JMenuItem(itemText, keyEvent);
         newItem.addActionListener(listener);
         return newItem;
     }
 
-    private JMenu createNewJMenu(String title, int keyEvent, String accessibleDescription){
+    private JMenu createNewJMenu(String title, int keyEvent, String accessibleDescription) {
         JMenu newMenuBar = new JMenu(title);
         newMenuBar.setMnemonic(keyEvent);
         newMenuBar.getAccessibleContext().setAccessibleDescription(
@@ -152,7 +170,7 @@ public class MainApplicationFrame extends JFrame
         return newMenuBar;
     }
 
-    private JMenu generateLookAndFeelMenu(){
+    private JMenu generateLookAndFeelMenu() {
         JMenu lookAndFeelMenu = createNewJMenu(LOOK_AND_FEEL_MENU_TITLE, KeyEvent.VK_V,
                 LOOK_AND_FEEL_MENU_DESCRIPTION);
 
@@ -176,7 +194,7 @@ public class MainApplicationFrame extends JFrame
         return lookAndFeelMenu;
     }
 
-    private JMenu generateTestMenu(){
+    private JMenu generateTestMenu() {
         JMenu testMenu = createNewJMenu(TEST_MENU_TITLE, KeyEvent.VK_T, TEST_MENU_DESCRIPTION);
 
         {
@@ -187,16 +205,12 @@ public class MainApplicationFrame extends JFrame
         return testMenu;
     }
 
-    private void setLookAndFeel(String className)
-    {
-        try
-        {
+    private void setLookAndFeel(String className) {
+        try {
             UIManager.setLookAndFeel(className);
             SwingUtilities.updateComponentTreeUI(this);
-        }
-        catch (ClassNotFoundException | InstantiationException
-                | IllegalAccessException | UnsupportedLookAndFeelException e)
-        {
+        } catch (ClassNotFoundException | InstantiationException
+                | IllegalAccessException | UnsupportedLookAndFeelException e) {
             // just ignore
         }
     }

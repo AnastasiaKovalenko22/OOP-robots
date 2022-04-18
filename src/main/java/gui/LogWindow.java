@@ -3,6 +3,8 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.TextArea;
+import java.beans.PropertyVetoException;
+import java.util.Map;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
@@ -10,9 +12,11 @@ import javax.swing.JPanel;
 import log.LogChangeListener;
 import log.LogEntry;
 import log.LogWindowSource;
+import state.StateFormer;
 
 public class LogWindow extends JInternalFrame implements LogChangeListener
 {
+    private final StateFormer stateFormer = new StateFormer(this);
     private LogWindowSource m_logSource;
     private TextArea m_logContent;
 
@@ -46,5 +50,13 @@ public class LogWindow extends JInternalFrame implements LogChangeListener
     public void onLogChanged()
     {
         EventQueue.invokeLater(this::updateLogContent);
+    }
+
+    public Map<String, String> saveState(){
+        return stateFormer.saveState();
+    }
+
+    public void restoreState(Map<String, String> data) throws PropertyVetoException {
+        stateFormer.restoreState(data);
     }
 }
