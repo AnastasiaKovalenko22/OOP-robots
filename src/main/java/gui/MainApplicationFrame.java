@@ -63,9 +63,8 @@ public class MainApplicationFrame extends JFrame {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent event) {
-                MapTransformer state = new MapTransformer(new HashMap<>());
-                state.addSubMapToGeneralMapByPrefix("log", logWindow.saveState());
-                state.addSubMapToGeneralMapByPrefix("game", gameWindow.saveState());
+                Map<String, String> state = new MapTransformer(new HashMap<>()).addSubMapToGeneralMapByPrefix("log", logWindow.saveState());
+                state = new MapTransformer(state).addSubMapToGeneralMapByPrefix("game", gameWindow.saveState());
                 stateFileManager.writeStateInFile(state);
                 showConfirmationExitDialog(event);
             }

@@ -1,5 +1,7 @@
 package state;
 
+import log.Logger;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +32,7 @@ public class StateFileManager {
             return result;
         }
         catch(IOException ex){
-            System.out.println(ex.getMessage());
+            Logger.error(ex.getMessage());
         }
         return null;
     }
@@ -46,7 +48,7 @@ public class StateFileManager {
             }
         }
         catch(IOException ex){
-            System.out.println(ex.getMessage());
+            Logger.error(ex.getMessage());
         }
     }
 }

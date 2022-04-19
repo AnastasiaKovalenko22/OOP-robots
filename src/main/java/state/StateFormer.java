@@ -5,6 +5,9 @@ import java.beans.PropertyVetoException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс обрабатывающий состояние окна, передаваемого в конструктор класса
+ */
 public class StateFormer implements SaveAndRestore{
     private final JInternalFrame frame;
 
@@ -12,6 +15,10 @@ public class StateFormer implements SaveAndRestore{
         this.frame = frame;
     }
 
+    /**
+     * Сохранение состояния окна, хранящегося в поле frame
+     * @return - Map: ключ - название параметра состояния, значение - значение параметра состояния
+     */
     @Override
     public Map<String, String> saveState() {
         Map<String, String> result = new HashMap<>();
@@ -28,6 +35,11 @@ public class StateFormer implements SaveAndRestore{
         return result;
     }
 
+    /**
+     * восстановление состояния окна, хранящегося в поле frame
+     * @param data - Map: ключ - название параметра состояния, значение - значение параметра состояния
+     * @throws PropertyVetoException - возникает, когда значение параметра состояния некорректное
+     */
     @Override
     public void restoreState(Map<String, String> data) throws PropertyVetoException {
         frame.setSize(Integer.parseInt(data.get("width")), Integer.parseInt(data.get("height")));

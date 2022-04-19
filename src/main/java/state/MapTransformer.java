@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * код для работы с подсловарями
  */
-public class MapTransformer extends AbstractMap<String, String>{
+public class MapTransformer{
 
     private final Map<String, String> generalMap;
 
@@ -20,13 +20,10 @@ public class MapTransformer extends AbstractMap<String, String>{
      */
     public Map<String, String> getSubMap(String prefix){
         Map<String, String> subMap = new HashMap<>();
-        for(Map.Entry<String, String> entry : generalMap.entrySet()){
-            String key = entry.getKey();
-            if (key.startsWith(prefix)){
-                String paramName = key.split("\\.")[1];
-                subMap.put(paramName, entry.getValue());
-            }
-        }
+        generalMap.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().startsWith(prefix))
+                .forEach(entry -> subMap.put(entry.getKey().split("\\.")[1], entry.getValue()));
         if(!subMap.isEmpty()){
             return subMap;
         }
@@ -42,9 +39,7 @@ public class MapTransformer extends AbstractMap<String, String>{
      */
     private Map<String, String> addPrefixToSubMap(Map<String, String> subMap, String prefix){
         Map<String, String> subMapWithPrefix = new HashMap<>();
-        for(Map.Entry<String, String> entry : subMap.entrySet()){
-            subMapWithPrefix.put(prefix + "." + entry.getKey(), entry.getValue());
-        }
+        subMap.forEach((key, value) -> subMapWithPrefix.put(prefix + "." + key, value));
         return subMapWithPrefix;
     }
 
@@ -53,14 +48,10 @@ public class MapTransformer extends AbstractMap<String, String>{
      * @param prefix - префикс, добвляемый к подсловарю
      * @param subMap - подсловарь
      */
-    public void addSubMapToGeneralMapByPrefix(String prefix, Map<String, String> subMap){
+    public Map<String, String> addSubMapToGeneralMapByPrefix(String prefix, Map<String, String> subMap){
+        Map<String, String> result = new HashMap<>(generalMap);
         subMap = addPrefixToSubMap(subMap, prefix);
-        generalMap.putAll(subMap);
-    }
-
-
-    @Override
-    public Set<Entry<String, String>> entrySet() {
-        return generalMap.entrySet();
+        result.putAll(subMap);
+        return result;
     }
 }
