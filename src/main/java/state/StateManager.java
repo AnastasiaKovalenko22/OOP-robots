@@ -7,10 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Класс для чтения из файла
- * и записи в файл состояний окон
+ * Класс для чтения и записи состояний окон
  */
-public class StateFileManager {
+public class StateManager {
     
     private final String HOME_DIR = System.getProperty("user.home");
     private final String FILE_NAME = HOME_DIR + "\\windowConfig.txt";

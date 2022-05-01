@@ -5,20 +5,14 @@ import java.util.*;
 /**
  * код для работы с подсловарями
  */
-public class MapTransformer{
-
-    private final Map<String, String> generalMap;
-
-    public MapTransformer(Map<String, String> initialMap){
-        this.generalMap = initialMap;
-    }
-
+public class StateTransformer {
     /**
      * код формирования подсловаря по общему словарю
      * @param prefix - префикс ключа
      * @return - подсловарь отдельной компоненты без префиксов
+     * @throws IllegalArgumentException - возникает, когда передан несуществующий префикс
      */
-    public Map<String, String> getSubMap(String prefix){
+    public static Map<String, String> getSubMap(Map<String, String> generalMap, String prefix){
         Map<String, String> subMap = new HashMap<>();
         generalMap.entrySet()
                 .stream()
@@ -37,7 +31,7 @@ public class MapTransformer{
      * @param prefix - префикс
      * @return - подсловарь с префиксом
      */
-    private Map<String, String> addPrefixToSubMap(Map<String, String> subMap, String prefix){
+    private static Map<String, String> addPrefixToSubMap(Map<String, String> subMap, String prefix){
         Map<String, String> subMapWithPrefix = new HashMap<>();
         subMap.forEach((key, value) -> subMapWithPrefix.put(prefix + "." + key, value));
         return subMapWithPrefix;
@@ -48,10 +42,8 @@ public class MapTransformer{
      * @param prefix - префикс, добвляемый к подсловарю
      * @param subMap - подсловарь
      */
-    public Map<String, String> addSubMapToGeneralMapByPrefix(String prefix, Map<String, String> subMap){
-        Map<String, String> result = new HashMap<>(generalMap);
+    public static void addSubMapToGeneralMapByPrefix(String prefix, Map<String, String> subMap, Map<String, String> generalMap){
         subMap = addPrefixToSubMap(subMap, prefix);
-        result.putAll(subMap);
-        return result;
+        generalMap.putAll(subMap);
     }
 }

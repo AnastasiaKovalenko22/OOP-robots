@@ -12,14 +12,9 @@ import java.util.Map;
 import javax.swing.*;
 
 import log.Logger;
-import state.MapTransformer;
-import state.StateFileManager;
+import state.StateTransformer;
+import state.StateManager;
 
-/**
- * Что требуется сделать:
- * 1. Метод создания меню перегружен функционалом и трудно читается.
- * Следует разделить его на серию более простых методов (или вообще выделить отдельный класс).
- */
 public class MainApplicationFrame extends JFrame {
     private static final String CLOSING_MENU_ITEM_TITLE = "Закрыть";
     private static final String LOOK_AND_FEEL_MENU_TITLE = "Режим отображения";
@@ -39,7 +34,7 @@ public class MainApplicationFrame extends JFrame {
     private static final String CLOSE_CONFIRMATION_DIALOG_NO_OPTION = "Нет";
 
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final StateFileManager stateFileManager = new StateFileManager();
+    private final StateManager stateFileManager = new StateManager();
 
     public MainApplicationFrame() throws PropertyVetoException {
         //Make the big window be indented 50 pixels from each edge
@@ -63,8 +58,13 @@ public class MainApplicationFrame extends JFrame {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent event) {
-                Map<String, String> state = new MapTransformer(new HashMap<>()).addSubMapToGeneralMapByPrefix("log", logWindow.saveState());
-                state = new MapTransformer(state).addSubMapToGeneralMapByPrefix("game", gameWindow.saveState());
+                Map<String, String> state = new HashMap<>();
+                StateTransformer
+                        .addSubMapToGeneralMapByPrefix("log",
+                                logWindow.saveState(), state);
+                StateTransformer
+                        .addSubMapToGeneralMapByPrefix("game",
+                                gameWindow.saveState(), state);
                 stateFileManager.writeStateInFile(state);
                 showConfirmationExitDialog(event);
             }
@@ -86,7 +86,7 @@ public class MainApplicationFrame extends JFrame {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
         Map<String, String> state = stateFileManager.readStateFromFile();
         if (state != null) {
-            logWindow.restoreState(new MapTransformer(state).getSubMap("log"));
+            logWindow.restoreState(StateTransformer.getSubMap(state, "log"));
         } else {
             logWindow.setLocation(10, 10);
             logWindow.setSize(300, 800);
@@ -101,7 +101,7 @@ public class MainApplicationFrame extends JFrame {
         GameWindow gameWindow = new GameWindow();
         Map<String, String> state = stateFileManager.readStateFromFile();
         if (state != null) {
-            gameWindow.restoreState(new MapTransformer(state).getSubMap("game"));
+            gameWindow.restoreState(StateTransformer.getSubMap(state,"game"));
         } else {
             gameWindow.setSize(400, 400);
         }
