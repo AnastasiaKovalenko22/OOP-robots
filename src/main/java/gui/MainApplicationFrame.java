@@ -52,6 +52,7 @@ public class MainApplicationFrame extends JFrame {
         addWindow(logWindow);
 
         GameWindow gameWindow = createGameWindow();
+        gameWindow.getRobotModel().addPropertyChangeListener(logWindow);
         addWindow(gameWindow);
 
         setJMenuBar(generateMenuBar());
