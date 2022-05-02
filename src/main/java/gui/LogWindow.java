@@ -12,11 +12,12 @@ import javax.swing.JPanel;
 import log.LogChangeListener;
 import log.LogEntry;
 import log.LogWindowSource;
-import state.StateFormer;
+import state.JInternalFrameStateFormer;
+import state.SaveAndRestore;
 
-public class LogWindow extends JInternalFrame implements LogChangeListener
+public class LogWindow extends JInternalFrame implements LogChangeListener, SaveAndRestore
 {
-    private final StateFormer stateFormer = new StateFormer(this);
+    private final JInternalFrameStateFormer stateFormer = new JInternalFrameStateFormer(this);
     private LogWindowSource m_logSource;
     private TextArea m_logContent;
 
@@ -52,10 +53,12 @@ public class LogWindow extends JInternalFrame implements LogChangeListener
         EventQueue.invokeLater(this::updateLogContent);
     }
 
+    @Override
     public Map<String, String> saveState(){
         return stateFormer.saveState();
     }
 
+    @Override
     public void restoreState(Map<String, String> data) throws PropertyVetoException {
         stateFormer.restoreState(data);
     }
