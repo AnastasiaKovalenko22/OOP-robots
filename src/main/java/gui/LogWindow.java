@@ -1,24 +1,33 @@
 package gui;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.TextArea;
-
-import javax.swing.JInternalFrame;
-import javax.swing.JPanel;
-
 import log.LogChangeListener;
 import log.LogEntry;
 import log.LogWindowSource;
+import log.Logger;
+import model.RobotModel;
+import state.JInternalFrameStateFormer;
+import state.SaveAndRestore;
 
-public class LogWindow extends JInternalFrame implements LogChangeListener
+import javax.swing.*;
+import java.awt.*;
+import java.beans.PropertyVetoException;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+
+public class LogWindow extends JInternalFrame implements LogChangeListener, SaveAndRestore, Observer
 {
-    private LogWindowSource m_logSource;
-    private TextArea m_logContent;
+    private final JInternalFrameStateFormer stateFormer = new JInternalFrameStateFormer(this);
+    private final LogWindowSource m_logSource;
+    private final TextArea m_logContent;
 
-    public LogWindow(LogWindowSource logSource) 
+    private final RobotModel robotModel;
+
+    public LogWindow(LogWindowSource logSource, RobotModel robotModel)
     {
         super("Протокол работы", true, true, true, true);
+        this.robotModel = robotModel;
+        this.robotModel.addObserver(this);
         m_logSource = logSource;
         m_logSource.registerListener(this);
         m_logContent = new TextArea("");
@@ -46,5 +55,21 @@ public class LogWindow extends JInternalFrame implements LogChangeListener
     public void onLogChanged()
     {
         EventQueue.invokeLater(this::updateLogContent);
+    }
+
+    @Override
+    public Map<String, String> saveState(){
+        return stateFormer.saveState();
+    }
+
+    @Override
+    public void restoreState(Map<String, String> data) throws PropertyVetoException {
+        stateFormer.restoreState(data);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        Logger.debug("x: " + robotModel.getM_targetPositionX()
+                + " y: " + robotModel.getM_targetPositionY());
     }
 }
