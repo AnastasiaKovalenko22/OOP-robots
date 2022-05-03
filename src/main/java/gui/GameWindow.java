@@ -14,13 +14,7 @@ import javax.swing.JPanel;
 public class GameWindow extends JInternalFrame implements SaveAndRestore {
     private final JInternalFrameStateFormer stateFormer = new JInternalFrameStateFormer(this);
 
-    private final RobotModel robotModel = new RobotModel();
-
-    public RobotModel getRobotModel(){
-        return robotModel;
-    }
-
-    public GameWindow() {
+    public GameWindow(RobotModel robotModel) {
         super("Игровое поле", true, true, true, true);
         GameVisualizer m_visualizer = new GameVisualizer(robotModel);
         JPanel panel = new JPanel(new BorderLayout());

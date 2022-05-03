@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.swing.*;
 
 import log.Logger;
+import model.RobotModel;
 import state.StateTransformer;
 import state.StateManager;
 
@@ -47,12 +48,12 @@ public class MainApplicationFrame extends JFrame {
 
         setContentPane(desktopPane);
 
+        RobotModel robotModel = new RobotModel();
 
-        LogWindow logWindow = createLogWindow();
+        LogWindow logWindow = createLogWindow(robotModel);
         addWindow(logWindow);
 
-        GameWindow gameWindow = createGameWindow();
-        gameWindow.getRobotModel().addPropertyChangeListener(logWindow);
+        GameWindow gameWindow = createGameWindow(robotModel);
         addWindow(gameWindow);
 
         setJMenuBar(generateMenuBar());
@@ -83,8 +84,8 @@ public class MainApplicationFrame extends JFrame {
         }
     }
 
-    protected LogWindow createLogWindow() throws PropertyVetoException {
-        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
+    protected LogWindow createLogWindow(RobotModel robotModel) throws PropertyVetoException {
+        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(), robotModel);
         Map<String, String> state = stateFileManager.readStateFromFile();
         if (state != null) {
             logWindow.restoreState(StateTransformer.getSubMap(state, "log"));
@@ -98,8 +99,8 @@ public class MainApplicationFrame extends JFrame {
         return logWindow;
     }
 
-    protected GameWindow createGameWindow() throws PropertyVetoException {
-        GameWindow gameWindow = new GameWindow();
+    protected GameWindow createGameWindow(RobotModel robotModel) throws PropertyVetoException {
+        GameWindow gameWindow = new GameWindow(robotModel);
         Map<String, String> state = stateFileManager.readStateFromFile();
         if (state != null) {
             gameWindow.restoreState(StateTransformer.getSubMap(state,"game"));
