@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -41,17 +40,11 @@ public class GameVisualizer extends JPanel implements Observer
             @Override
             public void mouseClicked(MouseEvent e)
             {
-                setTargetPosition(e.getPoint());
-                onRedrawEvent();
+                robotModel.setTargetPosition(e.getPoint());
                 repaint();
             }
         });
         setDoubleBuffered(true);
-    }
-
-    protected void setTargetPosition(Point p)
-    {
-        robotModel.setTargetPosition(p);
     }
     
     protected void onRedrawEvent()

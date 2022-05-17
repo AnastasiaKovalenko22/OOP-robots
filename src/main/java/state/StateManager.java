@@ -18,7 +18,7 @@ public class StateManager {
      * чтение состояний окон из файла
      * @return Map, ключ - название параметра состояния окна, значение - значение параметра
      */
-    public Map<String, String> readStateFromFile(){
+    public Map<String, String> readState(){
         Map<String, String> result = new HashMap<>();
         try(BufferedReader bufferedReader = new BufferedReader(new FileReader(FILE_NAME)))
         {
@@ -39,7 +39,7 @@ public class StateManager {
     /**
      * Запись состояния окна в файл
      */
-    public void writeStateInFile(Map<String, String> state){
+    public void writeState(Map<String, String> state){
         try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(FILE_NAME)))
         {
             for(Map.Entry<String, String> entry : state.entrySet()) {

@@ -10,10 +10,12 @@ import state.SaveAndRestore;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
+
+import static com.sun.java.accessibility.util.AWTEventMonitor.addWindowListener;
 
 public class LogWindow extends JInternalFrame implements LogChangeListener, SaveAndRestore, Observer
 {
@@ -38,6 +40,14 @@ public class LogWindow extends JInternalFrame implements LogChangeListener, Save
         getContentPane().add(panel);
         pack();
         updateLogContent();
+
+        //отписка от источника данных при закрытии окна
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent event) {
+                m_logSource.unregisterListener(LogWindow.this);
+            }
+        });
     }
 
     private void updateLogContent()
