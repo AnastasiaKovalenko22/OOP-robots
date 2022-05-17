@@ -33,6 +33,7 @@ public class RobotModel extends Observable {
         m_targetPositionX = p.x;
         m_targetPositionY = p.y;
     }
+
     public double getM_robotPositionX(){
         return m_robotPositionX;
     }
@@ -82,5 +83,4 @@ public class RobotModel extends Observable {
         m_robotDirection = RobotMath.angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
         setChanged();
     }
-
 }

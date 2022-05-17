@@ -35,7 +35,7 @@ public class MainApplicationFrame extends JFrame {
     private static final String CLOSE_CONFIRMATION_DIALOG_NO_OPTION = "Нет";
 
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final StateManager stateFileManager = new StateManager();
+    private final StateManager stateManager = new StateManager();
 
     public MainApplicationFrame() throws PropertyVetoException {
         //Make the big window be indented 50 pixels from each edge
@@ -67,7 +67,7 @@ public class MainApplicationFrame extends JFrame {
                 StateTransformer
                         .addSubMapToGeneralMapByPrefix("game",
                                 gameWindow.saveState(), state);
-                stateFileManager.writeStateInFile(state);
+                stateManager.writeState(state);
                 showConfirmationExitDialog(event);
             }
         });
@@ -86,7 +86,7 @@ public class MainApplicationFrame extends JFrame {
 
     protected LogWindow createLogWindow(RobotModel robotModel) throws PropertyVetoException {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(), robotModel);
-        Map<String, String> state = stateFileManager.readStateFromFile();
+        Map<String, String> state = stateManager.readState();
         if (state != null) {
             logWindow.restoreState(StateTransformer.getSubMap(state, "log"));
         } else {
@@ -101,7 +101,7 @@ public class MainApplicationFrame extends JFrame {
 
     protected GameWindow createGameWindow(RobotModel robotModel) throws PropertyVetoException {
         GameWindow gameWindow = new GameWindow(robotModel);
-        Map<String, String> state = stateFileManager.readStateFromFile();
+        Map<String, String> state = stateManager.readState();
         if (state != null) {
             gameWindow.restoreState(StateTransformer.getSubMap(state,"game"));
         } else {
